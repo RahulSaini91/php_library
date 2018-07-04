@@ -307,7 +307,9 @@ class VCard {
 	 * return vcard data in array
 	 * * * * * * * * * * * * * * * * * */
     public function output(){
-        print_r($this->_vcard);
+	$vcard = $this->_vcard();
+        $this->_vcard = array();
+	return $vcard;
     }
     
     
