@@ -29,14 +29,23 @@ class VCard {
 	    }
 	    $add[] = PHP_EOL;
 	    $add[] = $this->begin();
-	    $add[] = $this->_n($vcard['first_name'],$vcard['last_name'],$vcard['title']);
-	    $add[] = $this->_fn($vcard['first_name'].' '.$vcard['last_name']);
-	    $add[] = $this->_org($vcard['organisation']);
-	    $add[] = $this->_title($vcard['organisation_role']);
-	    $add[] = $this->_photo($vcard['photo']);
-	    $add[] = $this->_tel($vcard['telephone']);
-	    $add[] = $this->_adr($vcard['address']);
-	    $add[] = $this->_email($vcard['email']);
+	    $add[] = $this->_n(@$vcard['first_name'],@$vcard['last_name'],@$vcard['title']);
+	    $add[] = $this->_fn(@$vcard['first_name'].' '.@$vcard['last_name']);
+	    $add[] = $this->_org(@$vcard['organisation']);
+	    $add[] = $this->_title(@$vcard['organisation_role']);
+	    $add[] = $this->_photo(@$vcard['photo']);
+	    $add[] = $this->_tel(@$vcard['telephone']);
+	    $add[] = $this->_adr(@$vcard['address']);
+	    $add[] = $this->_email(@$vcard['email']);
+	    $add[] = $this->_nickname(@$vcard['nickname']);
+		$add[] = $this->_url(@$vcard['website']);
+		$add[] = $this->_geo(@$vcard['location']);
+		$add[] = $this->_class(@$vcard['class']);
+		$add[] = $this->_class(@$vcard['gender']);
+		$add[] = $this->_class(@$vcard['anniversary']);
+		$add[] = $this->_class(@$vcard['caladruri']);
+		$add[] = $this->_class(@$vcard['caluri']);
+		$add[] = $this->_class(@$vcard['class']);
 	    $add[] = $this->end();
 	    $add[] = PHP_EOL;
 	    $add = join('',$add);
@@ -46,7 +55,9 @@ class VCard {
 	    }
 	}
 	private function _n($first=false,$last=false,$title=false){
-
+		if(!trim($first) || !trim($last) || !trim($title)){
+			return;
+		}
 		switch($this->_version){
 			case '2.1':
 				$format = 'N:{last_name};{first_name};;{title};';
@@ -64,7 +75,7 @@ class VCard {
 		return  str_replace($search,$replace,$format).PHP_EOL;
 	}
 	private function _fn($str){
-		if(!$str){
+		if(!trim($str)){
 			return;
 		}
 		switch($this->_version){
@@ -206,6 +217,78 @@ class VCard {
 			
 		}
 		return $email;
+	}
+	private function _geo($location){
+		if(!$location){
+			return;
+		}
+		$format='';
+		$location = explode(',',$location);
+		$lat = $location[0];
+		$long = $location[1];
+		if(!$lat || !$long){
+			return;
+		}
+		switch($this->_version){
+			case '2.1':
+				$format = 'GEO:'.$lat.';'.$long.PHP_EOL;
+				break;
+			case '3.0':
+				$format = 'GEO:'.$lat.';'.$long.PHP_EOL;
+				break;
+			case '4.0':
+				$format = 'GEO:geo:'.$lat.','.$long.PHP_EOL;
+				break;
+		}
+		return $format;
+	}
+	private function _nickname($nickname){
+		if(!trim($nickname)){
+			return;
+		}
+		$format='';
+		switch($this->_version){
+			case '3.0':
+				$format = 'NICKNAME:'.$nickname.PHP_EOL;
+				break;
+			case '4.0':
+				$format = 'NICKNAME:'.$nickname.PHP_EOL;
+				break;
+		}
+		return $format;
+	}
+	private function _url($str){
+		return ($str && filter_var($str,FILTER_VALIDATE_URL))?'URL:'.$str.PHP_EOL:false;		
+	}
+
+
+	/* only Version 3.0 Supported */
+	private function _class($str){
+		if($this->_version=='3.0'){
+			return ($str)?'CLASS:'.$str.PHP_EOL:false;
+		}
+	}
+
+	/* Only Version 4.0 Supported */
+	private function _gender($str){
+		if($this->_version=='4.0'){
+			return ($str)?'GENDER:'.$str.PHP_EOL:false;
+		}
+	}
+	private function _anniversary($str){
+		if($this->_version=='4.0'){
+			return ($str)?'ANNIVERSARY:'.date("Ymd", strtotime($str)).PHP_EOL:false;
+		}
+	}
+	private function _caladruri($str){
+		if($this->_version=='4.0'){
+			return ($str)?'CALADRURI:'.$str.PHP_EOL:false;	
+		}
+	}
+	private function _caluri($str){
+		if($this->_version=='4.0'){
+			return ($str)?'CALURI:'.$str.PHP_EOL:false;	
+		}
 	}
 	/* * * * * * * * * * * * * * * * * * 
 	 * Generate Multiple VCard Data
