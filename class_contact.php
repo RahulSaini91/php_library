@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Github URL:
+ * Github URL: https://github.com/RahulSaini91/php_library/blob/master/class_contact.php
  */
 
 class contact{
